@@ -1,6 +1,5 @@
-// У файлі main.js напиши всю логіку роботи додатка.
-
 import { queryImg } from './js/pixabay-api';
+import { addNewImg } from './js/pixabay-api';
 import { addToImgBox } from './js/render-functions';
 
 import SimpleLightbox from 'simplelightbox';
@@ -11,13 +10,16 @@ import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.search-form');
 let imagesBox = document.querySelector('.images-box');
-const loader = document.querySelector('.js-loader');
+const loadBtn = document.querySelector('.load-btn');
 
 form.addEventListener('submit', handleSubmit);
+loadBtn.addEventListener('click', handleClickLoadBtn);
 
 function handleSubmit(event) {
     event.preventDefault();
     const query = event.target.elements.query.value.trim();
+
+    loadBtn.classList.add('is-hidden');
 
     if (!query) {
         iziToast.show({
@@ -31,8 +33,6 @@ function handleSubmit(event) {
         imagesBox.innerHTML = '';
         return;
     }
-
-    loader.classList.add('loader');
 
     queryImg(query)
         .then(params => {
@@ -51,6 +51,7 @@ function handleSubmit(event) {
             } else {
                 const markup = addToImgBox(params.hits);
                 imagesBox.innerHTML = markup;
+                loadBtn.classList.remove('is-hidden');
                 simpleLightBox.refresh();
             }
         })
@@ -65,3 +66,18 @@ let simpleLightBox = new SimpleLightbox('.images-box a', {
     captionsData: 'alt',
     captionClass: 'text-center',
 });
+
+async function handleClickLoadBtn() {
+    const images = await addNewImg();
+    const markup = addToImgBox(images.hits);
+    imagesBox.insertAdjacentHTML('beforeend', markup);
+    simpleLightBox.refresh();
+
+    const cardElements = document.querySelector('.images-list');
+    let cardElementsHeight = cardElements.getBoundingClientRect().height;
+    window.scrollBy({
+        left: 0,
+        top: cardElementsHeight * 2,
+        behavior: 'smooth',
+    });
+}
