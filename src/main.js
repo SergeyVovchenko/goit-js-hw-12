@@ -48,10 +48,18 @@ function handleSubmit(event) {
                 });
                 imagesBox.innerHTML = '';
                 return;
-            } else {
-                const markup = addToImgBox(params.hits);
+            }
+
+            const markup = addToImgBox(params.hits);
+            const pages = Math.round(params.totalHits / params.hits.length);
+
+            if (pages > 1) {
                 imagesBox.innerHTML = markup;
                 loadBtn.classList.remove('is-hidden');
+                simpleLightBox.refresh();
+            } else {
+                loadBtn.classList.add('is-hidden');
+                imagesBox.innerHTML = markup;
                 simpleLightBox.refresh();
             }
         })
